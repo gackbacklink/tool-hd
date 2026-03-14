@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Image Editor Numeric Crop</title>
+<title>Galeri Pribadi</title>
 
 <style>
 body{
@@ -20,21 +20,45 @@ max-width:1000px;
 margin:auto;
 }
 
-canvas{
-max-width:100%;
-background:white;
-border-radius:10px;
-margin-top:15px;
+input{
+margin:10px 0;
 }
 
-input, button{
-padding:8px;
-margin:5px;
-border-radius:6px;
+.gallery{
+display:grid;
+grid-template-columns:repeat(auto-fill,minmax(150px,1fr));
+gap:10px;
+margin-top:20px;
+}
+
+.card{
+position:relative;
+}
+
+.card img{
+width:100%;
+height:150px;
+object-fit:cover;
+border-radius:8px;
+}
+
+.deleteBtn{
+position:absolute;
+top:5px;
+right:5px;
+background:red;
 border:none;
+color:white;
+padding:5px;
+border-radius:5px;
+cursor:pointer;
+font-size:12px;
 }
 
 button{
+padding:8px 12px;
+border:none;
+border-radius:6px;
 cursor:pointer;
 background:#1e293b;
 color:white;
@@ -45,10 +69,6 @@ button:hover{
 background:#00c6ff;
 }
 
-.controls{
-margin-top:15px;
-}
-
 </style>
 </head>
 
@@ -56,117 +76,84 @@ margin-top:15px;
 
 <div class="container">
 
-<h2>🖼 Image Editor - Numeric Crop</h2>
+<h2>🖼 Galeri Foto Pribadi</h2>
 
-<input type="file" id="upload" accept="image/*">
-
-<br><br>
-
-<canvas id="canvas"></canvas>
-
-<div class="controls">
-
-<h3>🎨 Filter</h3>
-
-<button onclick="setFilter('none')">Normal</button>
-<button onclick="setFilter('grayscale(100%)')">Grayscale</button>
-<button onclick="setFilter('sepia(100%)')">Sepia</button>
-<button onclick="setFilter('contrast(180%)')">Contrast</button>
-<button onclick="setFilter('brightness(130%)')">Bright</button>
-
-<h3>✂ Crop Pakai Angka</h3>
-
-<input type="number" id="cropWidth" placeholder="Width">
-<input type="number" id="cropHeight" placeholder="Height">
+<input type="file" id="upload" multiple accept="image/*">
 <br>
-<button onclick="cropByNumber()">Crop Sekarang</button>
+<button onclick="clearGallery()">Hapus Semua</button>
 
-<h3>📥 Download</h3>
-
-<button onclick="downloadImage()">Download</button>
-
-</div>
+<div class="gallery" id="gallery"></div>
 
 </div>
 
 <script>
 
 const upload=document.getElementById("upload");
-const canvas=document.getElementById("canvas");
-const ctx=canvas.getContext("2d");
+const gallery=document.getElementById("gallery");
 
-let img=new Image();
-let currentFilter="none";
+let photos=JSON.parse(localStorage.getItem("myGallery")) || [];
+
+function saveToStorage(){
+localStorage.setItem("myGallery",JSON.stringify(photos));
+}
+
+function renderGallery(){
+gallery.innerHTML="";
+
+photos.forEach((photo,index)=>{
+
+const div=document.createElement("div");
+div.className="card";
+
+const img=document.createElement("img");
+img.src=photo;
+
+const btn=document.createElement("button");
+btn.className="deleteBtn";
+btn.innerText="X";
+
+btn.onclick=function(){
+photos.splice(index,1);
+saveToStorage();
+renderGallery();
+}
+
+div.appendChild(img);
+div.appendChild(btn);
+gallery.appendChild(div);
+
+});
+}
 
 upload.addEventListener("change",function(){
 
-const file=this.files[0];
-if(!file) return;
+const files=this.files;
+
+for(let file of files){
 
 const reader=new FileReader();
 
 reader.onload=function(e){
-
-img.onload=function(){
-
-canvas.width=img.width;
-canvas.height=img.height;
-
-ctx.drawImage(img,0,0);
-
-}
-
-img.src=e.target.result;
-
+photos.push(e.target.result);
+saveToStorage();
+renderGallery();
 }
 
 reader.readAsDataURL(file);
 
+}
+
 });
 
-function setFilter(filter){
-
-currentFilter=filter;
-
-ctx.filter=currentFilter;
-ctx.drawImage(img,0,0,canvas.width,canvas.height);
-ctx.filter="none";
-
+function clearGallery(){
+if(confirm("Yakin hapus semua foto?")){
+photos=[];
+saveToStorage();
+renderGallery();
+}
 }
 
-function cropByNumber(){
-
-const newWidth=parseInt(document.getElementById("cropWidth").value);
-const newHeight=parseInt(document.getElementById("cropHeight").value);
-
-if(!newWidth || !newHeight){
-alert("Masukkan width dan height dulu!");
-return;
-}
-
-const temp=document.createElement("canvas");
-const tctx=temp.getContext("2d");
-
-temp.width=newWidth;
-temp.height=newHeight;
-
-tctx.drawImage(canvas,0,0,newWidth,newHeight);
-
-canvas.width=newWidth;
-canvas.height=newHeight;
-
-ctx.drawImage(temp,0,0);
-
-}
-
-function downloadImage(){
-
-const link=document.createElement("a");
-link.download="edited-image.png";
-link.href=canvas.toDataURL("image/png");
-link.click();
-
-}
+renderGallery();
 
 </script>
 
