@@ -1,0 +1,50 @@
+
+body{
+font-family: Arial, sans-serif;
+background:#f4f6fb;
+margin:0;
+text-align:center;
+}
+
+header{
+background:white;
+padding:15px;
+box-shadow:0 2px 5px rgba(0,0,0,0.1);
+}
+
+.container{
+margin-top:60px;
+}
+
+.preview-box{
+margin-top:20px;
+}
+
+.preview-box img{
+max-width:300px;
+border-radius:10px;
+box-shadow:0 5px 15px rgba(0,0,0,0.1);
+}
+
+.buttons{
+margin-top:20px;
+}
+
+button{
+background:#4a7dfc;
+color:white;
+border:none;
+padding:12px 25px;
+margin:10px;
+border-radius:8px;
+cursor:pointer;
+font-size:16px;
+}
+
+button:hover{
+background:#3a66d6;
+}
+
+canvas{
+display:none;
+}
